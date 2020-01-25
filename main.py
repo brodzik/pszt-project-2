@@ -1,19 +1,25 @@
-import pandas as pd
-import random
-import numpy as np
 import os
-from sklearn.model_selection import train_test_split
+import random
+import warnings
+
+import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, f1_score
+from sklearn.metrics import f1_score, roc_auc_score
+from sklearn.model_selection import KFold, train_test_split
+
+import xgboost as xgb
+
+warnings.filterwarnings("ignore")
+
+SEED = 123
+N_FOLDS = 5
 
 
 def seed_everything(seed):
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
     np.random.seed(seed)
-
-
-SEED = 123
 
 
 def main():
@@ -26,16 +32,25 @@ def main():
             labels = {value: index for index, value in enumerate(["__UNKNOWN__"] + list(set(df[c].astype(str).values)))}
             df[c] = df[c].map(lambda x: labels.get(x)).fillna(labels["__UNKNOWN__"]).astype(int)
 
-    X, y = df[:].drop("y", axis=1), df["y"]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=SEED)
+    X, y = df[:].drop(["y", "duration"], axis=1), df["y"]
 
-    model = LogisticRegression(random_state=SEED)
-    model.fit(X_train, y_train)
+    folds = KFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED)
 
-    print(model.score(X_test, y_test))
+    for fold_idx, (train_idx, valid_idx) in enumerate(folds.split(X, y)):
+        print("Fold:", fold_idx + 1, flush=True)
 
-    y_pred = model.predict_proba(X_test).astype(float)[:, 1]
-    print(roc_auc_score(list(y_test), y_pred))
+        X_train, y_train = X.iloc[train_idx, :], y[train_idx]
+        X_valid, y_valid = X.iloc[valid_idx, :], y[valid_idx]
+
+        model = LogisticRegression(solver="lbfgs", random_state=SEED)
+        model.fit(X_train, y_train)
+        y_pred = model.predict_proba(X_valid).astype(float)[:, 1]
+        print("logistic regression score:", roc_auc_score(list(y_valid), y_pred))
+
+        model = xgb.XGBRegressor(objective="reg:squarederror", random_state=SEED)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_valid).astype(float)
+        print("XGBoost score:", roc_auc_score(list(y_valid), y_pred))
 
 
 if __name__ == "__main__":
