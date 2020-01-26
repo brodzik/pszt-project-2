@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, roc_auc_score
-from sklearn.model_selection import KFold, train_test_split
+from sklearn.model_selection import StratifiedKFold
 
 import xgboost as xgb
 
@@ -29,12 +29,12 @@ def main():
 
     for c in df.columns:
         if df[c].dtype == "object":
-            labels = {value: index for index, value in enumerate(["__UNKNOWN__"] + list(set(df[c].astype(str).values)))}
+            labels = {value: index for index, value in enumerate(["__UNKNOWN__"] + sorted(list(set(df[c].astype(str).values))))}
             df[c] = df[c].map(lambda x: labels.get(x)).fillna(labels["__UNKNOWN__"]).astype(int)
 
-    X, y = df[:].drop(["y", "duration"], axis=1), df["y"]
+    X, y = df.drop(["y", "duration"], axis=1), df["y"]
 
-    folds = KFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED)
+    folds = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED)
 
     for fold_idx, (train_idx, valid_idx) in enumerate(folds.split(X, y)):
         print("Fold:", fold_idx + 1, flush=True)
@@ -45,12 +45,12 @@ def main():
         model = LogisticRegression(solver="lbfgs", random_state=SEED)
         model.fit(X_train, y_train)
         y_pred = model.predict_proba(X_valid).astype(float)[:, 1]
-        print("logistic regression score:", roc_auc_score(list(y_valid), y_pred))
+        print("logistic regression score:", roc_auc_score(list(y_valid), y_pred), flush=True)
 
         model = xgb.XGBRegressor(objective="reg:squarederror", random_state=SEED)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_valid).astype(float)
-        print("XGBoost score:", roc_auc_score(list(y_valid), y_pred))
+        print("XGBoost score:", roc_auc_score(list(y_valid), y_pred), flush=True)
 
 
 if __name__ == "__main__":
