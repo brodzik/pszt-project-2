@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("seed", type=int)
     parser.add_argument("n_folds", type=int)
-    parser.add_argument("output_features", type=bool, default=False)
+    parser.add_argument('-o', '--output_features', action="store_true")
 
     args = parser.parse_args()
 

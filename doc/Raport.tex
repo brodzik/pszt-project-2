@@ -28,14 +28,49 @@ Plik danych: \texttt{bank-additional-full.csv}
 \\
 Opis danych: \texttt{bank-additional-names.txt}
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_1.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_2.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_3.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_4.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_5.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_6.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{data_7.png}
+\end{figure}
+
 \section*{Eksperyment}
 Dane są ładowane z pliku \texttt{bank-additional-full.csv} do pamięci za pomocą modułu \texttt{pandas}.
 \\
 \\
-Wartości kolumny celu \texttt{y} są mapowane na $0$ dla wartości \texttt{no}, albo $1$ dla wartości \texttt{yes}. Następnie wartości kolumn kategorycznych są jednoznacznie mapowane na liczby całkowite dodatnie. Gdyby model był zapisany i uruchomiony na nowych danych, to wartości danych powinny być dokładnie tak zakodowane, jak podczas procesu uczenia się modelu. Natomiast dane, które nigdy wcześniej się nie pojawiły są kodowane na wartość wyrażenia \texttt{\_\_UNKNOWN\_\_}. Na koniec usuwane są kolumny niepotrzebne (w zależności od wykonywanego eksperymentu).
+Wartości kolumny celu \textit{y} są mapowane na $0$ dla wartości \textit{no}, albo $1$ dla wartości \textit{yes}. Następnie wartości kolumn kategorycznych są jednoznacznie mapowane na liczby całkowite dodatnie. Gdyby model był zapisany i uruchomiony na nowych danych, to wartości danych powinny być dokładnie tak zakodowane, jak podczas procesu uczenia się modelu. Natomiast dane, które nigdy wcześniej się nie pojawiły są kodowane na wartość wyrażenia \texttt{\_\_UNKNOWN\_\_}. Na koniec usuwane są kolumny niepotrzebne (w zależności od wykonywanego eksperymentu).
 \\
 \\
-Do podziału danych wykorzystany jest proces k-krotnej walidacji z modułu \texttt{scikit-learn}. Ponadto dane są rozłożone równomiernie ze względu na wartość kolumny celu \texttt{y} (ang. \textit{stratified k-fold}).
+Do podziału danych wykorzystany jest proces k-krotnej walidacji z modułu \texttt{scikit-learn}. Ponadto dane są rozłożone równomiernie ze względu na wartość kolumny celu \textit{y} (ang. \textit{stratified k-fold}).
 \\
 \\
 W każdej z $k$ iteracji generowane są dwa zbiory danych: treningowy oraz walidacyjny. Zbiór treningowy służy do uczenia modelu \texttt{LogisticRegression} z modułu \texttt{scikit-learn} albo \texttt{XGBRegressor} z modułu \texttt{XGBoost}. Zbiór walidacyjny służy do oceny nauczonego modelu, np. za pomocą \texttt{roc\_auc\_score} z modułu \texttt{scikit-learn}. ROC-AUC określa w jakim stopniu nauczony model jest w stanie rozpoznać daną klasę.
@@ -46,29 +81,28 @@ Do automatycznego strojenia parametrów wykorzystano moduł \texttt{hyperopt}, a
 \\
 Dla regresji logistycznej przeszukano następujące parametry:
 \begin{itemize}
-	\item tol - tolerance for stopping criteria
-	\item C - inverse of regularization strength
-	\item fit\_intercept - specifies if a constant should be added to the decision function
-	\item class\_weight - weights associated with classes
-	\item solver - algorithm to use in the optimization problem
-	\item max\_iter - maximum number of iterations taken for the solvers to converge
-	\item warm\_start
+	\item tol - tolerancja błędu, aby doszło do wczesnego zatrzymania
+	\item C - odwrotność regularyzacji
+	\item fit\_intercept - czy powinna być dodana stała, np. bias
+	\item class\_weight - wagi klas
+	\item solver - algorytm optymalizacyjny
+	\item max\_iter - maksymalna liczba iteracji
 \end{itemize}
 Dla XGBoost przeszukano następujące parametry:
 \begin{itemize}
-	\item n\_estimators
-	\item max\_depth
-	\item learning\_rate
-	\item booster
-	\item tree\_method
-	\item gamma
-	\item subsample
-	\item colsample\_bytree
-	\item colsample\_bylevel
-	\item colsample\_bynode
-	\item reg\_alpha
-	\item reg\_lambda
-	\item scale\_pos\_weight
+	\item n\_estimators - liczba drzew
+	\item max\_depth - maksymalna głębokość drzew
+	\item learning\_rate - współczynnik nauczania
+	\item booster - algorytm wzmocnienia gradientowego
+	\item tree\_method - algorytm konstruowania drzew
+	\item gamma - minimalna redukcja błędu potrzebna, aby doszło do podziału liścia
+	\item subsample - współczynnik instancji treningowej
+	\item colsample\_bytree - współczynnik kolumn podczas budowania drzewa
+	\item colsample\_bylevel - współczynnik kolumn dla każdego poziomu w drzewie
+	\item colsample\_bynode - współczynnik kolumn do podziału
+	\item reg\_alpha - regularyzacja L1
+	\item reg\_lambda - regularyzacja L2
+	\item scale\_pos\_weight - równoważenie dodatnich i ujemnych wag
 \end{itemize}
 
 \pgfplotstableread{
@@ -107,6 +141,55 @@ Dla XGBoost przeszukano następujące parametry:
 \section*{Wyniki}
 \begin{figure}[H]
 	\centering
+	\includegraphics[scale=0.35]{features.png}
+	\caption{\textbf{Najważniejsze kolumny wg XGBoost} (bez \textit{duration})}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.35]{features_2.png}
+	\caption{\textbf{Najważniejsze kolumny wg XGBoost} (bez \textit{duration}, \textit{nr.employed})}
+\end{figure}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{c|c|c}
+		seed & \begin{tabular}[c]{@{}c@{}}regresja logistyczna\\ ROC AUC (\%)\end{tabular} & \begin{tabular}[c]{@{}c@{}}XGBoost\\ ROC AUC (\%)\end{tabular} \\ \hline
+		42 & 78.60 & 80.54 \\ \hline
+		64 & 78.63 & 80.50 \\ \hline
+		100 & 78.69 & 80.70 \\ \hline
+		123 & 78.65 & 80.47 \\ \hline
+		234 & 78.63 & 80.48 \\ \hline
+		345 & 78.63 & 80.65 \\ \hline
+		456 & 78.59 & 80.53 \\ \hline
+		567 & 78.56 & 80.53 \\ \hline
+		678 & 78.69 & 80.60 \\ \hline
+		789 & 78.69 & 80.60
+	\end{tabular}
+	\caption{Wyniki (bez kolumny \textit{duration})}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{c|c|c}
+		seed & \begin{tabular}[c]{@{}c@{}}regresja logistyczna\\ ROC AUC (\%)\end{tabular} & \begin{tabular}[c]{@{}c@{}}XGBoost\\ ROC AUC (\%)\end{tabular} \\ \hline
+		42 & 93.23 & 95.07 \\ \hline
+		64 & 93.24 & 95.00 \\ \hline
+		100 & 93.24 & 95.07 \\ \hline
+		123 & 93.23 & 95.06 \\ \hline
+		234 & 93.23 & 95.05 \\ \hline
+		345 & 93.21 & 95.03 \\ \hline
+		456 & 93.24 & 95.05 \\ \hline
+		567 & 93.23 & 94.99 \\ \hline
+		678 & 93.23 & 95.01 \\ \hline
+		789 & 93.23 & 95.09
+	\end{tabular}
+	\caption{Wyniki (wszystkie kolumny)}
+	\label{tab:my-table}
+\end{table}
+
+\begin{figure}[H]
+	\centering
 	\begin{tikzpicture}
 	\begin{axis}[
 		xlabel=k,
@@ -129,7 +212,7 @@ Dla XGBoost przeszukano następujące parametry:
 	\begin{tikzpicture}
 	\begin{axis}[
 		xlabel=k,
-		ylabel=average ROC AUC (\%),
+		ylabel=ROC AUC (\%),
 		grid=both,
 		xmin=2,
 		ymin=80.4,
@@ -143,16 +226,17 @@ Dla XGBoost przeszukano następujące parametry:
 	\caption{\textbf{XGBoost i k-krotna walidacja.} Wyższa ocena świadczy o efektywniejszej klasyfikacji.}
 \end{figure}
 
-\begin{figure}[H]
-\includegraphics[scale=0.35]{features.png}
-\caption{\textbf{Najważniejsze atrybuty wg XGBoost.}}
-\end{figure}
-
 \section*{Dyskusja}
+W przypadku użycia wszystkich kolumn oba algorytmy otrzymały wyższe wyniki. Stało się tak, ponieważ kolumna \textit{duration} ma duży wpływ na kolumnę docelową \textit{y}. W pozostałych testach nie użyto \textit{duration}.
+\\
+\\
+Usunięcie kolumny \textit{nr.employed} nie wpłynęło negatywnie na efektywność modeli mimo tego, że była to najważniejsza kolumna według XGBoost. Najważniejszą kolumną stała się wówczas \textit{poutcome}, tzn. obecny wynik głównie zależy od wyniku poprzedniej rozmowy z klientem. Ponadto ważne są kolumny dotyczące koniunktury rynku, np. \textit{euribor3m}.
+\\
+\\
 Wyższa wartość $k$ w procesie k-krotnej walidacji nie oznacza, że klasyfikator będzie efektywniejszy. Zbiór treningowy jest proporcjonalnie większy, ale zbiór walidacyjny jest proporcjonalnie mniejszy. Ciężko jest wykryć przeuczenie modelu, mając zbyt mały zbiór walidacyjny.
 
 \section*{Wnioski}
-Teza została potwierdzona.
+Teza została potwierdzona w granicy błędu $2\%-3\%$ ROC AUC. Regresja logistyczna i XGBoost są skutecznymi algorytmami do klasyfikacji zadanej przestrzeni danych.
 
 \nocite{*}
 \bibliographystyle{plain}
