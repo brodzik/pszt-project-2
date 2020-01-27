@@ -27,6 +27,22 @@ Porównać algorytmy regresji logistycznej i XGBoost.
 Plik danych: \texttt{bank-additional-full.csv}
 \\
 Opis danych: \texttt{bank-additional-names.txt}
+\\
+\\
+Zbiór danych wykorzystywanych w projekcie pochodzi z kampanii marketingowej lokaty terminowej
+prowadzonej przez portugalską instytucję finansową. Owa kampania oparta była o kontakt
+telefoniczny. Każdy rekord przedstawia jednego klienta, z podziałem na poszczególne atrybuty.
+\\
+\\
+Atrybuty wejściowe przedstawiają szczegóły danego klienta umożliwiające dokładniejszą klasyfikację,
+natomiast atrybutem wyjściowym jest informacja o decyzji przystąpieniu do lokaty terminowej.
+Podział względem poszczególnych atrybutów, pozwala stwierdzić iż dominującą grupą wiekową są
+osoby w wieku 31-40, niestety nie wiemy nic o podziale na płeć poszczególnych osób. Kolejną
+obserwacją jest większościowy udział osób po ślubie. Dominującym zawodem wśród klientów były
+osoby administracji publicznej. Pod względem wykształcenia osoby które najczęściej decydowały się
+na lokatę były osobami, które uzyskały wykształcenie podstawowe oraz uniwersyteckie. Atrybut
+\textit{duration} nie jest uwzględniany w analizie i nie jest używany w doświadczeniu tworzenia modelu
+predykcyjnego ze względu na niewiedzę zakończenia trwającej rozmowy.
 
 \begin{figure}[H]
 	\centering
@@ -67,7 +83,7 @@ Opis danych: \texttt{bank-additional-names.txt}
 Dane są ładowane z pliku \texttt{bank-additional-full.csv} do pamięci za pomocą modułu \texttt{pandas}.
 \\
 \\
-Wartości kolumny celu \textit{y} są mapowane na $0$ dla wartości \textit{no}, albo $1$ dla wartości \textit{yes}. Następnie wartości kolumn kategorycznych są jednoznacznie mapowane na liczby całkowite dodatnie. Gdyby model był zapisany i uruchomiony na nowych danych, to wartości danych powinny być dokładnie tak zakodowane, jak podczas procesu uczenia się modelu. Natomiast dane, które nigdy wcześniej się nie pojawiły są kodowane na wartość wyrażenia \texttt{\_\_UNKNOWN\_\_}. Na koniec usuwane są kolumny niepotrzebne (w zależności od wykonywanego eksperymentu).
+Wartości kolumny celu \textit{y} są mapowane na $0$ dla wartości \textit{no}, albo $1$ dla wartości \textit{yes}. Następnie wartości kolumn kategorycznych są jednoznacznie mapowane na liczby całkowite dodatnie. Gdyby model był zapisany i uruchomiony na nowych danych, to wartości danych powinny być dokładnie tak zakodowane, jak podczas procesu uczenia się modelu. Natomiast dane, które nigdy wcześniej się nie pojawiły, są kodowane na wartość wyrażenia \texttt{\_\_UNKNOWN\_\_}. Na koniec usuwane są kolumny niepotrzebne (w zależności od wykonywanego eksperymentu).
 \\
 \\
 Do podziału danych wykorzystany jest proces k-krotnej walidacji z modułu \texttt{scikit-learn}. Ponadto dane są rozłożone równomiernie ze względu na wartość kolumny celu \textit{y} (ang. \textit{stratified k-fold}).
@@ -82,7 +98,7 @@ Do automatycznego strojenia parametrów wykorzystano moduł \texttt{hyperopt}, a
 Dla regresji logistycznej przeszukano następujące parametry:
 \begin{itemize}
 	\item tol - tolerancja błędu, aby doszło do wczesnego zatrzymania
-	\item C - odwrotność regularyzacji
+	\item C - odwrotność siły regularyzacji
 	\item fit\_intercept - czy powinna być dodana stała, np. bias
 	\item class\_weight - wagi klas
 	\item solver - algorytm optymalizacyjny
@@ -185,7 +201,6 @@ Dla XGBoost przeszukano następujące parametry:
 		789 & 93.23 & 95.09
 	\end{tabular}
 	\caption{Wyniki (wszystkie kolumny)}
-	\label{tab:my-table}
 \end{table}
 
 \begin{figure}[H]
@@ -193,7 +208,7 @@ Dla XGBoost przeszukano następujące parametry:
 	\begin{tikzpicture}
 	\begin{axis}[
 		xlabel=k,
-		ylabel=average ROC AUC (\%),
+		ylabel=ROC AUC (\%),
 		grid=both,
 		xmin=2,
 		ymin=78.63,
@@ -236,7 +251,13 @@ Usunięcie kolumny \textit{nr.employed} nie wpłynęło negatywnie na efektywno�
 Wyższa wartość $k$ w procesie k-krotnej walidacji nie oznacza, że klasyfikator będzie efektywniejszy. Zbiór treningowy jest proporcjonalnie większy, ale zbiór walidacyjny jest proporcjonalnie mniejszy. Ciężko jest wykryć przeuczenie modelu, mając zbyt mały zbiór walidacyjny.
 
 \section*{Wnioski}
-Teza została potwierdzona w granicy błędu $2\%-3\%$ ROC AUC. Regresja logistyczna i XGBoost są skutecznymi algorytmami do klasyfikacji zadanej przestrzeni danych.
+Teza została potwierdzona w granicy błędu $2\%-3\%$ ROC AUC. Regresja logistyczna i XGBoost są skutecznymi algorytmami do klasyfikacji obiektów z zadanej przestrzeni i detekcji nieliniowych relacji między nimi.
+\\
+\\
+XGBoost osiągnął lepszy wynik, ale jego złożoność i czas obliczeniowy był znacznie gorszy w porównaniu do prostszego algorytmu regresji logistycznej. Model regresji logistycznej, który właściwie jest uogólnionym modelem liniowym, jest prostszy w konstrukcji i zrozumieniu niż losowo generowane drzewa decyzyjne XGBoost. Dlatego też większość instytucji finansowych preferuje, albo nawet musi, używać tych prostszych modeli.
+\\
+\\
+XGBoost i podobne biblioteki wzmocnień gradientowych mają szerokie zastosowanie w bardziej skomplikowanych problemach, w szczególności konkursach sztucznej inteligencji, gdzie oprócz strojenia parametrów, konieczna jest inżyniera danych.
 
 \nocite{*}
 \bibliographystyle{plain}
